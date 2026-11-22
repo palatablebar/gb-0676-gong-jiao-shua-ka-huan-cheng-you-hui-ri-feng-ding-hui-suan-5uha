@@ -43,8 +43,8 @@ def create_app():
     @application.get("/api/runs/<run_id>/archive")
     def archive(run_id):
         from app.archive import build_archive
-        run=store.get(run_id)
-        return application.response_class(build_archive(run),mimetype="text/csv",headers={"Content-Disposition":'attachment; filename="evidence.csv"'})
+        published=store.publish(run_id,build_archive)
+        return application.response_class(published["body"],mimetype="text/csv",headers={"Content-Disposition":'attachment; filename="evidence.csv"',"X-Archive-Version":str(published["archive_version"]),"X-Archive-SHA256":published["sha256"]})
     for index,(slug,title) in enumerate(MODULES,1):
         module=importlib.import_module(f"app.modules.m{index}_{slug}.handler")
         application.register_blueprint(module.bp)

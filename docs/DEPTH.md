@@ -31,10 +31,13 @@
 | TRAP-11 | 混合偏移 | 落错版本 | UTC归整 | `app/values.py` | `tests/test_m3.py::test_timezone_equal` |
 | TRAP-23 | 换乘截止点 | 重复优惠 | 截止点排除 | `app/modules/m5_discounts/rules.py` | `tests/test_m5.py::test_exact_window_excluded` |
 | TRAP-25 | 票价重叠 | 随意取版 | 冲突隔离 | `app/modules/m3_fares/rules.py` | `tests/test_m3.py::test_overlap_rejected` |
+| TRAP-27 | 公式样式文本 | 直接写入导出被表格执行 | 采信保留原值，发布加单引号呈现并留存base64原文 | `app/textsafe.py`、`app/archive.py` | `tests/test_textsafety.py::test_archive_renders_safe_and_recovers_original` |
+| TRAP-28 | 排除行丢失 | 只导出采纳与隔离，重复/空白/表头无着落 | 逐来源行台账，未着落阻断封存 | `app/lineage.py`、`app/modules/m7_settlement/rules.py` | `tests/test_textsafety.py::test_archive_keeps_every_source_line` |
+| TRAP-29 | 重复发布 | 每次导出新增一条 | 内容相同复用版本，失败保留旧版 | `app/store.py` | `tests/test_textsafety.py::test_publish_is_idempotent` |
 
 ## 对账规则
 
-输入原始逻辑行=最终采纳来源行+隔离来源行+重复行+空白行+分段表头。派生记录用_sources保存完整来源，因此分组不丢行。业务预期合计与上游申报合计之差等于逐行差异之和。结果按输入摘要、规则版本及参数产生唯一批次，事务写入；同源重跑只复用已有批次。
+输入原始逻辑行=最终采纳来源行+隔离来源行+重复行+空白行+分段表头，多行引号记录按其物理区间计入。M1建立lineage台账，M6逐行复核并补出空缺段（unplaced），M7要求台账完整才允许封存。派生记录用_sources保存完整来源，因此分组不丢行。业务预期合计与上游申报合计之差等于逐行差异之和。结果按输入摘要、规则版本及参数产生唯一批次，事务写入；同源重跑只复用已有批次。证据导出每来源行恰一行，公式样式文本的原值与呈现值同处一行，发布幂等且失败保留旧版。
 
 ## 已知不覆盖
 

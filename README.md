@@ -27,14 +27,14 @@ docker compose exec -T app pytest -q
 
 ## 演示
 
-1. 打开首页，核对当次计算、差异和隔离原因。
+1. 打开首页，核对当次计算、差异和隔离原因；底部“来源行台账”按来源行列出原值、呈现值与处置原因。
 2. 切换模块查看源行及裁决依据。
-3. 重跑相同样例，批次号与行数保持一致。
-4. 复核后导出一份证据CSV。版本已变化的复核提交返回409。
+3. 重跑相同样例，批次号与行数保持一致，不新增记录。
+4. 复核后导出一份证据CSV：每来源行恰一行，公式样式文本以单引号前缀安全呈现，原值随行保存为 base64 可追回。版本已变化的复核提交返回409；发布失败保留上一版。
 
 ## 输入与输出
 
-输入列见 `docs/DATA-DICTIONARY.md`。项目包含dirty.csv、clean.csv、legacy.csv，统一走实际导入路径。上传限制4MB，拒绝不带时区的时间。业务键按字符串保留，Decimal参与计算，空值不会当零。
+输入列见 `docs/DATA-DICTIONARY.md`。项目包含dirty.csv、clean.csv、legacy.csv与textrisk.csv（公式样式文本样例），统一走实际导入路径。上传限制4MB，拒绝不带时区的时间。业务键按字符串保留，Decimal参与计算，空值不会当零。
 
 `POST /api/runs` 接收sample或csv；`GET /api/runs`返回历史批次；`POST /api/runs/<id>/review`需要version与decision；`GET /api/runs/<id>/archive`返回唯一证据导出。
 
